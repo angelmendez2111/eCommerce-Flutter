@@ -9,4 +9,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     return success;
   }
+
+  Future<bool> confirmEmail(String email, String code) async {
+    bool success = await _apiService.confirmEmail(email, code);
+    notifyListeners();
+    return success;
+  }
 }

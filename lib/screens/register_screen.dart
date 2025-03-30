@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'confirm_email_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -10,12 +11,11 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false; // Estado para manejar la carga
+  bool _isLoading = false;
 
   void _register() async {
-    setState(() {
-      _isLoading = true; // Muestra el indicador de carga
-    });
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     bool success = await authProvider.register(
@@ -23,13 +23,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _passwordController.text.trim(),
     );
 
-    setState(() {
-      _isLoading = false; // Oculta el indicador de carga
-    });
+    setState(() => _isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(success ? "Registro exitoso" : "Error en el registro")),
-    );
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ConfirmEmailScreen(email: _emailController.text.trim())),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error en el registro")),
+      );
+    }
   }
 
   @override
@@ -52,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             SizedBox(height: 20),
             _isLoading
-                ? CircularProgressIndicator() // Muestra el indicador de carga
+                ? CircularProgressIndicator()
                 : ElevatedButton(
               onPressed: _register,
               child: Text("Registrarse"),
